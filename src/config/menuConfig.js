@@ -1,83 +1,88 @@
 const menuList = [
     { 
         title: '个人资料', // 菜单标题名称 
-        key: '/home', // 对应的 path 
-        icon: 'HomeOutlined', // 图标名称 
+        key: '/admin/home', // 对应的 path 
+        icon: 'IdcardOutlined', // 图标名称 
         isPublic: true, //公开的
     },
     { 
         title: '设置', 
-        key: '/setup',
-        icon: 'AppstoreOutlined',
+        key: '/admin/setup',
+        icon: 'SettingOutlined',
         children: [ // 子菜单列表 
             { 
                 title: '站点',
-                key: '/setup1',
-                icon: 'BarsOutlined' 
+                key: '/admin/setup1',
+                icon: 'CreditCardOutlined' 
             },
             { 
                 title: '样式',
-                key: '/setup2',
-                icon: 'ToolOutlined'
+                key: '/admin/setup2',
+                icon: 'FormatPainterOutlined'
             }, 
             { 
                 title: '预览',
-                key: '/setup3',
-                icon: 'BarsOutlined' 
+                key: '/admin/setup3',
+                icon: 'CameraOutlined' 
             },
             { 
                 title: '全局',
-                key: '/setup4',
-                icon: 'ToolOutlined'
+                key: '/admin/setup4',
+                icon: 'GlobalOutlined'
             },
             { 
                 title: '其他',
-                key: '/setup5',
+                key: '/admin/setup5',
                 icon: 'BarsOutlined' 
             }
         ] 
     },
     { 
         title: '任务', 
-        key: '/task',
-        icon: 'AppstoreOutlined',
+        key: '/admin/task',
+        icon: 'ApartmentOutlined',
         children: [ // 子菜单列表 
             { 
                 title: 'Aria2',
-                key: '/task1',
-                icon: 'BarsOutlined' 
+                key: '/admin/task1',
+                icon: 'CloudDownloadOutlined' 
             },
             { 
                 title: '上传',
-                key: '/task2',
-                icon: 'ToolOutlined'
+                key: '/admin/task2',
+                icon: 'CloudUploadOutlined'
             }, 
             { 
                 title: '复制',
-                key: '/task3',
-                icon: 'BarsOutlined' 
+                key: '/admin/task3',
+                icon: 'CopyOutlined' 
             }
         ] 
     },
     { 
         title: '用户',
-        key: '/user',
+        key: '/admin/user',
         icon: 'UserOutlined' 
     },
     { 
         title: '存储', 
-        key: '/storage', 
-        icon: 'SafetyOutlined'
+        key: '/admin/storage', 
+        icon: 'DatabaseOutlined'
     },
     { 
         title: '元信息', 
-        key: '/Information', 
-        icon: 'SafetyOutlined'
+        key: '/admin/Information', 
+        icon: 'BuildOutlined'
     },
     { 
         title: '关于', 
-        key: '/about', 
-        icon: 'SafetyOutlined'
+        key: '/admin/about', 
+        icon: 'BlockOutlined'
+    },
+    { 
+        title: '主页', 
+        key: '/client', 
+        icon: 'HomeOutlined'
     },
 ]
 

@@ -1,0 +1,103 @@
+.client {
+    min-height: 100vh;
+    background-color: rgb(21,23,24);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .client-header {
+        width: 62vw;
+        background-color: rgb(21,23,24);
+        color: rgb(0, 161, 191);
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .client-content {
+        width: 62vw;
+        background-color: rgb(21,23,24);
+        .client-breadcrumb {
+            margin: 10px 0 0 20px;
+            font-size: 17px;
+            .client-breadcrumbItem {
+                cursor: pointer;
+            }
+            .client-breadcrumbItem:hover {
+                color: white;
+            }
+        }
+        .client-card {
+            background-color: rgb(32,36,37);
+            border-radius: 20px;
+            margin-top: 20px;
+            margin-left: 25px;
+            width: 60vw;
+            box-shadow:  5px 5px 3px #121314,
+             -5px -5px 3px #181b1c;
+            .client-table {
+                background-color: rgb(32,36,37);
+            }
+        }
+        .client-toolbar {
+            width: 20px;
+            position: fixed;
+            right: 55px;
+            bottom: 85px;
+            Button {
+                color: rgb(24,144,255);
+            }
+        }
+    }
+    .client-footer {
+        width: 62vw;
+        text-align: center;
+        background-color: rgb(21,23,24);
+    }
+}
+.client-listitem {
+    font-size: 15px;
+}
+.client-listitem:hover {
+    background-color: rgb(50,54,55);
+    cursor: pointer;
+}
+
+.client-form {
+    Input {
+        background-color: rgb(32,36,37);
+        border-radius: 10px;
+        height: 40px;
+    }
+}
+.client-form-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    .client-form-submit {
+        background-color: rgba(16, 42, 76, 0.8);
+        border-radius: 10px;
+        color: rgb(82,169,255);
+        border: 0px;
+        height: 40px;
+        width: 10vw;
+    }
+}
+
+//更改表头样式
+.ant-table-thead > tr >th{
+    color: #909399  !important;    
+    background: rgb(32,36,37) !important;
+    font-size: 15px !important;
+    font-weight: bold !important;
+}
+
+.ant-table-tbody > tr > td {
+    font-size: 15px !important;
+}
+
+//更改悬浮颜色
+.ant-table-tbody > tr:hover:not(.ant-table-expanded-row) > td,.ant-table-row-hover,.ant-table-row-hover>td{
+    background-color: rgb(50,54,55)!important;
+}
+ 
+.ant-table-fixed .ant-table-row-hover,.ant-table-row-hover>td{
+    background-color: rgb(50,54,55) !important;
+}

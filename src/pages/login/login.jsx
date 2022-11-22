@@ -13,10 +13,10 @@ import { useNavigate } from 'react-router-dom';
 function Login() {
     
     const navigate = useNavigate();
+    const [form] = Form.useForm();
 
     //提交表单且数据验证成功后回调事件
     const onFinish = async(values) => {
-        // 
         //请求登录
         const {username, password} = values;
         const result = await reqLogin(username, password);
@@ -29,7 +29,7 @@ function Login() {
             const user = result.resultObject;
             storageUtils.saveUser(user); //保存到local中
             //不需要再回退到登陆页面，则用replace，否则用push        
-            navigate('/home', {replace: true});
+            navigate('/client', {replace: true});
         } else {
             notification.open({
                 message: result.resultMsg,
@@ -38,12 +38,16 @@ function Login() {
         }
     };
 
+    const onReset = () => {
+        form.resetFields();
+    };
+
     useEffect(() => {
         //如果用户已经登录，自动跳转到管理界面
         const user = storageUtils.getUser();
-        console.log('1login', user, JSON.stringify(user) !== '{}')
+        console.log('login', user, JSON.stringify(user) !== '{}')
         if (JSON.stringify(user) !== '{}'){
-            navigate('/home', {replace: true});
+            navigate('/client', {replace: true});
         }
     })
 
@@ -59,6 +63,7 @@ function Login() {
                     <Form
                         name="normal_login"
                         className="login-form"
+                        form={form}
                         initialValues={{
                             remember: true,
                         }}
@@ -98,7 +103,9 @@ function Login() {
                             <Input type="password" placeholder="请输入密码" bordered={false} size="large" />
                         </Form.Item>
                         <Form.Item className='login-form-button'>
-                            <Button type="primary" size="large" htmlType="submit" className="login-form-clear"> 清除 </Button>
+                            <Button type="primary" size="large"  
+                            htmlType="button"
+                            className="login-form-clear" onClick={onReset}> 清除 </Button>
                             <Button type="primary" size="large" htmlType="submit" className="login-form-submit"> 登录 </Button>
                         </Form.Item>
                     </Form>

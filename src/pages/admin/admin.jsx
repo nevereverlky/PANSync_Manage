@@ -20,7 +20,7 @@ function Admin() {
     useEffect(() => {
         const user = storageUtils.getUser();
         //如果内存中没有存储user，则说明当前没登录
-        console.log('1admin', user, JSON.stringify(user) === '{}')
+        console.log('admin', user, JSON.stringify(user) === '{}')
         if (JSON.stringify(user) === '{}') {
         //自动跳转到登录页面（在render()中）
             navigate('/login', {replace: true});
@@ -36,10 +36,11 @@ function Admin() {
                     </Sider>
                     <Content className='admin-content'>
                         <Routes>
-                            <Route path='/home' element={<Home/>}/>
-                            <Route path='/user' element={<User/>}/>
-                            <Route path='/storage' element={<Storage/>}/>
-                            <Route element={<notFound/>}/>{/**上面没有一个匹配的，直接显示 */}<Route path="/*" element={<Navigate to="/home" />} />
+                            <Route path='/home' element={<Home/>} exact/>
+                            <Route path='/user' element={<User/>} exact/>
+                            <Route path='/storage' element={<Storage/>} exact/>
+                            <Route element={<notFound/>}/>{/**上面没有一个匹配的，直接显示 */}
+                            <Route path="/*" element={<Navigate to="/admin/home" />} />
                         </Routes>
                     </Content>
                 </Layout>
