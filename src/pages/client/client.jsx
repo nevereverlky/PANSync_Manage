@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import storageUtils from '../../utils/storageUtils';
 import { Card, Button, Layout, Breadcrumb, Table, notification, Popover, List, Modal, Input, Form, TreeSelect, Upload } from 'antd';
 import { EditOutlined, HomeTwoTone, FolderFilled, SyncOutlined, FolderAddOutlined, CloudUploadOutlined, ExclamationCircleFilled, InboxOutlined, CopyOutlined, DeleteOutlined, CloudDownloadOutlined, CheckCircleFilled } from '@ant-design/icons';
-import { reqFileList, reqManageFile, reqDownloadFile, reqCreateFile, reqUploadFile, reqFileTree, reqVisibleStoreList } from '../../api';
-import { formateDate } from '../../utils/dateUtils';
+import { reqFileList, reqManageFile, reqDownloadFile, reqCreateFile, reqUploadFile, reqFileTree, reqVisibleStoreList, reqWebDavFileList, reqDownloadWebDavFile, reqDeleteWebDavFile } from '../../api';
+import { formateDate, utc2timestamp } from '../../utils/dateUtils';
 import { b2ValueUnit } from '../../utils/BtoMBUtils';
 import SparkMD5 from 'spark-md5';
 const { Header, Footer, Content } = Layout;
@@ -17,10 +17,13 @@ const { Dragger } = Upload;
 
 function Client() {
 
-    const accessToken = '123.c1c352e8742a42213a6124c012e4f0a9.YnW-tUTzotuvhcJS8GuHp5y9T4ETKiSu9VBns_-.RKipLQ';//网盘token
+    const [storeSort, setstoreSort] = useState("");
+    const [accessToken, setAccessToken] = useState("");
     const navigate = useNavigate();
     //当前路径
     const [dir, setDir] = useState('');
+    //当前storeId
+    const [storeId, setStoreId] = useState('');
     //当前文件名
     const [fileName, setFileName] = useState('');
     //当前fsId
@@ -84,7 +87,7 @@ function Client() {
         ellipsis:true,
         align: 'right',
         render: (size) => {
-          if(size === 0) {
+          if(size === 0 || size === -1) {
             return "-"
           } else {
             return b2ValueUnit(size)
@@ -115,16 +118,16 @@ function Client() {
     //面包屑
     const [extraBreadcrumbItems, setExtraBreadcrumbItems] = useState([]);
     const breadcrumbItems = [
-      <Breadcrumb.Item key="home" className="client-breadcrumbItem" style={{margin: '0 5px 0 5px'}} onClick={()=> getStoreList()}>
+      <Breadcrumb.Item key="home" className="client-breadcrumbItem" style={{margin: '0 5px 0 5px'}} onClick={()=> {window.location.reload()}}>
         <HomeTwoTone style={{marginRight: '10px', fontSize: '20px' }}/>主页
       </Breadcrumb.Item>,
     ].concat(extraBreadcrumbItems);
     //跳转到管理端
     const toManage = () => {
-      navigate('/admin/home', {replace: true});
+      navigate('/admin/storage', {replace: true});
     }
     //获取百度网盘文件列表
-    const getFileList = async(dir) => {
+    const getFileList = async(dir, accessToken) => {
       if(dir) {
         setLoading(true);
         const result = await reqFileList(accessToken, dir);
@@ -151,7 +154,69 @@ function Client() {
         if (result.resultCode === '200') {
             const fileList = result.resultObject.list;
             fileList.forEach((item) => {
-              item['key']=item.serverFilename
+              item['key']=item.serverFilename;
+              item['accessToken']=accessToken;
+              item['storeId']=null;
+              item['storeSort']=storeSort;
+            })
+            setDataSource(fileList);
+            console.log(fileList);
+        } else {
+            notification.open({
+                message: result.resultMsg,
+                icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
+            });
+        }
+      }
+    }
+    //获取WebDav文件列表
+    const getWebDavFileList = async(dir, storeId) => {
+      if(dir) {
+        setLoading(true);
+        const filepath = dir;
+        const result = await reqWebDavFileList(storeId, filepath);
+        setLoading(false);
+        const url = dir.split('/');//['https:', '', 'zwd.wiki:5006', 'webdav', '']
+        if(url[1] === '') {
+          url.shift();
+          url.shift();
+          url.shift();
+          if(url[url.length-1] === ''){
+            url.pop();
+          }
+        } else {
+          url.shift();
+          if(url[url.length-1] === ''){
+            url.pop();
+          }
+        }
+        setExtraBreadcrumbItems(url.map((item) => {
+            return (
+              <Breadcrumb.Item key={item} className="client-breadcrumbItem" style={{margin: '0 5px 0 5px'}} onClick={()=> {
+                let toItem = '/';
+                url.forEach((t) => {
+                  if(t !== item){
+                    toItem = toItem + t + '/';
+                  } else {
+                    toItem = toItem + item;
+                    setDir(toItem);
+                  }
+                }) 
+              }}>
+                {item}
+              </Breadcrumb.Item>
+            )
+        }))
+        if (result.resultCode === '200') {
+            const fileList = result.resultObject;
+            fileList.forEach((item) => {
+              item['key']=item.name;
+              item['serverFilename']=item.name;
+              item['size']=item.contentLength;
+              item['serverMtime']=utc2timestamp(item.modified);
+              item['accessToken']=null;
+              item['storeId']=storeId;
+              item['storeSort']=storeSort;
             })
             setDataSource(fileList);
             console.log(fileList);
@@ -164,7 +229,7 @@ function Client() {
       }
     }
     //操作弹框
-    //重命名
+    //百度网盘重命名
     const [isRenameOpen, setIsRenameOpen] = useState(false);
     const handleRenameOk = async(value) => {
       const async = 1;
@@ -173,7 +238,7 @@ function Client() {
       const result = await reqManageFile(accessToken, async, filelist, opear);
       // console.log(result);
       if (result.resultCode === '200') {
-        getFileList(dir);
+        getFileList(dir, accessToken);
         notification.open({
           message: '重命名成功',
           icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
@@ -190,7 +255,7 @@ function Client() {
       setIsRenameOpen(false);
       setFileName('');
     };
-    //创建文件夹
+    //百度网盘创建文件夹
     const [isCreateFileOpen, setIsCreateFileOpen] = useState(false);
     const handleCreateFileOk = async(value) => {
       const isdir = "1";
@@ -201,7 +266,7 @@ function Client() {
       const result = await reqCreateFile(accessToken, isdir, path, size, blockList, uploadid);
       // console.log(result);
       if (result.resultCode === '200') {
-        getFileList(dir);
+        getFileList(dir, accessToken);
         notification.open({
           message: '创建文件夹成功',
           icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
@@ -217,7 +282,7 @@ function Client() {
     const handleCreateFileCancel = () => {
       setIsCreateFileOpen(false);
     };
-    //移动
+    //百度网盘移动
     const [treeData, setTreeData] = useState([]);
     // const treeData = [
     //   {
@@ -294,7 +359,7 @@ function Client() {
       const result = await reqManageFile(accessToken, async, filelist, opear);
       // console.log(result);
       if (result.resultCode === '200') {
-        getFileList(dir);
+        getFileList(dir, accessToken);
         notification.open({
           message: '移动成功',
           icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
@@ -311,7 +376,7 @@ function Client() {
       setIsMoveOpen(false);
       setFileName('');
     };
-    //复制
+    //百度网盘复制
     const [copyValue, setCopyValue] = useState('');
     const onCopyChange = (newValue) => {
       setCopyValue(newValue);
@@ -325,7 +390,7 @@ function Client() {
       const result = await reqManageFile(accessToken, async, filelist, opear);
       // console.log(result);
       if (result.resultCode === '200') {
-        getFileList(dir);
+        getFileList(dir, accessToken);
         notification.open({
           message: '复制成功',
           icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
@@ -342,8 +407,9 @@ function Client() {
       setIsCopyOpen(false);
       setFileName('');
     };
-    //删除
+    //百度网盘/WebDav 删除
     const showDeleteConfirm = () => {
+      console.log(storeSort)
       confirm({
         title: '删除',
         icon: <ExclamationCircleFilled />,
@@ -352,22 +418,49 @@ function Client() {
         okType: 'danger',
         cancelText: '取消',
         async onOk() {
-          const async = 1;
-          const opear = 'delete';
-          const filelist = ["\"" + dir+"/"+fileName + "\""];
-          const result = await reqManageFile(accessToken, async, filelist, opear);
-          // console.log(result);
-          if (result.resultCode === '200') {
-            getFileList(dir);
-            notification.open({
-              message: '删除成功',
-              icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
-            });
-          } else {
-            notification.open({
-                message: result.resultMsg,
-                icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
-            });
+          if(storeSort === '百度网盘'){
+            const async = 1;
+            const opear = 'delete';
+            const filelist = ["\"" + dir+"/"+fileName + "\""];
+            const result = await reqManageFile(accessToken, async, filelist, opear);
+            // console.log(result);
+            if (result.resultCode === '200') {
+              getFileList(dir, accessToken);
+              notification.open({
+                message: '删除成功',
+                icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
+              });
+            } else {
+              notification.open({
+                  message: result.resultMsg,
+                  icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
+              });
+            }
+          } else if(storeSort === '阿里云盘' || storeSort === 'WebDav'){
+            const url = dir.split('/');//['https:', '', 'zwd.wiki:5006', 'webdav', '']
+            if(url[1] === '') {
+              url.shift();
+              url.shift();
+              url.shift();
+            } else {
+              url.shift();
+            }
+            const path = url.join('/')
+            const filepath = "/"+ path + fileName;
+            const result = await reqDeleteWebDavFile(storeId, filepath);
+            // console.log(result);
+            if (result.resultCode === '200') {
+              getWebDavFileList(dir, storeId);
+              notification.open({
+                message: '删除成功',
+                icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
+              });
+            } else {
+              notification.open({
+                  message: result.resultMsg,
+                  icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
+              });
+            }
           }
         },
         onCancel() {
@@ -375,32 +468,74 @@ function Client() {
         },
       });
     };
-    //下载
-    const download= (url, filename) => {
+    //百度网盘/WebDav下载
+    const download = (url, filename) => {
       const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       link.click();
     }
+    // dataurl是后端返回的base64字符串，name是文件名
+    const dataURLtoDownload = (dataurl, name) => {
+      var bstr = atob(dataurl), //解析 base-64 编码的字符串
+        n = bstr.length,
+        u8arr = new Uint8Array(n); //创建初始化为0的，包含length个元素的无符号整型数组
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n); //返回字符串第一个字符的 Unicode 编码
+      }
+      let blob = new Blob([u8arr]); //转化成blob
+      let url = URL.createObjectURL(blob);//这个新的URL 对象表示指定的 File 对象或 Blob 对象
+      let a = document.createElement('a') //创建一个a标签
+      a.href = url;
+      a.download = name;
+      a.click();
+        URL.revokeObjectURL(a.href); //释放之前创建的url对象
+    }
     const downloadFile = async() => {
-      // console.log(fsId);
-      const fsids = [fsId];
-      const result = await reqDownloadFile(accessToken, fsids);
-      // console.log(result);
-      if (result.resultCode === '200') {
-        download(result.resultObject[0], fileName);
-        notification.open({
-          message: '下载成功',
-          icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
-        });
-      } else {
-        notification.open({
-            message: result.resultMsg,
-            icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
-        });
+      if(storeSort === '百度网盘'){
+        // console.log(fsId);
+        const fsids = [fsId];
+        const result = await reqDownloadFile(accessToken, fsids);
+        // console.log(result);
+        if (result.resultCode === '200') {
+          download(result.resultObject[0], fileName);
+          notification.open({
+            message: '下载成功',
+            icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
+          });
+        } else {
+          notification.open({
+              message: result.resultMsg,
+              icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
+          });
+        }
+      } else if(storeSort === '阿里云盘' || storeSort === 'WebDav') {
+        const url = dir.split('/');//['https:', '', 'zwd.wiki:5006', 'webdav', '']
+        if(url[1] === '') {
+          url.shift();
+          url.shift();
+          url.shift();
+        } else {
+          url.shift();
+        }
+        const path = url.join('/')
+        const filepath = "/"+path+fileName;
+        const result = await reqDownloadWebDavFile(storeId, filepath);
+        if (result) {
+          dataURLtoDownload(result, fileName);
+          notification.open({
+            message: '下载成功',
+            icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
+          });
+        } else {
+          notification.open({
+              message: result.resultMsg,
+              icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
+          });
+        }
       }
     }
-    //上传
+    //百度网盘上传
     const [isUploadFileOpen, setIsUploadFileOpen] = useState(false);
     const [fileList, setFileList] = useState(undefined);
     //获取已经上传文件的列表
@@ -478,7 +613,7 @@ function Client() {
         const result = await reqUploadFile(formData);
         // console.log(result);
         if (result.resultCode === '200') {
-          getFileList(dir);
+          getFileList(dir, accessToken);
           notification.open({
             message: '上传文件成功',
             icon: <CheckCircleFilled style={{ color: 'rgb(48,164,108)' }} />,
@@ -500,7 +635,7 @@ function Client() {
     const handleUploadFileCancel = () => {
       setIsUploadFileOpen(false);
     };
-    //操作-管理文件，复制，移动，重命名，删除
+    //百度网盘操作-管理文件，复制，移动，重命名，删除
     const manageFile = async(action) => {
       if(action === '重命名') {
         setIsRenameOpen(true);
@@ -529,7 +664,7 @@ function Client() {
           });
         }
     }
-    //获取百度网盘文件列表
+    //获取可见文件列表
     const getStoreList = async() => {
         setLoading(true);
         const result = await reqVisibleStoreList();
@@ -537,11 +672,14 @@ function Client() {
         if (result.resultCode === '200') {
             const storeList = result.resultObject;
             storeList.forEach((item) => {
+              item['storeSort']=item.storeSort;
               item['key']=item.id;
               item['serverFilename']=item.storeName;
               item['size']=0;
               item['serverMtime']="-";
               item['path']=item.storeUrl;
+              item['accessToken']=item.storeToken;
+              item['storeId']=item.id;
             })
             setDataSource(storeList);
             console.log(storeList);
@@ -568,8 +706,14 @@ function Client() {
     }, [])
     //第一次以及依赖项发生变化后执行
     useEffect(() => {
-      getFileList(dir)
-    },[dir])
+      if(storeSort === '百度网盘'){
+        //百度网盘
+        getFileList(dir, accessToken);
+      } else if(storeSort === '阿里云盘' || storeSort === 'WebDav') {
+        //WebDav
+        getWebDavFileList(dir, storeId);
+      }
+    },[storeSort, dir, accessToken, storeId])
 
         return (
             <Layout className='client'>
@@ -586,7 +730,7 @@ function Client() {
                           rowClassName='client-table'
                           onRow={record => {
                             return {
-                              onDoubleClick: event => {setDir(record.path)},// 双击行
+                              onDoubleClick: event => {setstoreSort(record.storeSort);setDir(record.path);setAccessToken(record.accessToken);setStoreId(record.storeId)},// 双击行
                               onClick: event => { setFileName(record.serverFilename); setFsId(record.fsId);}//单击行
                             };
                           }}
@@ -594,7 +738,7 @@ function Client() {
                         />
                     </Card>
                     <div className='client-toolbar'>
-                      <Button type="text" icon={<SyncOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={() => {getFileList(dir)}}/>
+                      <Button type="text" icon={<SyncOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={() => {getFileList(dir, accessToken)}}/>
                       {/* <Button type="text" icon={<FileAddOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}}/> */}
                       <Button type="text" icon={<FolderAddOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={() => {setIsCreateFileOpen(true)}}/>
                       <Button type="text" icon={<CloudUploadOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={() => {setIsUploadFileOpen(true)}}/>

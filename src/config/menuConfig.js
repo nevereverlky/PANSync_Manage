@@ -12,7 +12,7 @@ const menuList = [
         children: [ // 子菜单列表 
             { 
                 title: '站点',
-                key: '/admin/setup1',
+                key: '/admin/notice',
                 icon: 'CreditCardOutlined' 
             },
             { 

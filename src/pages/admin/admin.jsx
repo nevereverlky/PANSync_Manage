@@ -10,6 +10,7 @@ import Header from '../../components/header';
 import Home from '../home/home';
 import User from '../user/user';
 import Storage from '../storage/storage';
+import Notice from '../notice/notice';
 import storageUtils from '../../utils/storageUtils';
 const { Content, Footer, Sider } = Layout;
 
@@ -37,10 +38,11 @@ function Admin() {
                     <Content className='admin-content'>
                         <Routes>
                             <Route path='/home' element={<Home/>} exact/>
+                            <Route path='/notice' element={<Notice/>} exact/>
                             <Route path='/user' element={<User/>} exact/>
                             <Route path='/storage/*' element={<Storage/>} exact/>
                             <Route element={<notFound/>}/>{/**上面没有一个匹配的，直接显示 */}
-                            <Route path="/*" element={<Navigate to="/admin/home" />} />
+                            <Route path="/*" element={<Navigate to="/admin/storage" />} />
                         </Routes>
                     </Content>
                 </Layout>

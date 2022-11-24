@@ -9,7 +9,7 @@ module.exports = function (app) {
             pathRewrite: {'^/api': ''} //重写请求路径，保证交给后台服务器是正常地请求地址（必须配置）
         }),
         // createProxyMiddleware('/api', {
-        //     target: 'http://110.40.157.92:7720',
+        //     target: 'http://192.168.43.242:8080/',
         //     changeOrigin: true,
         //     pathRewrite: {'^/api': ''}
         // })
