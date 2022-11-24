@@ -12,7 +12,10 @@ function LeftNav() {
 
   //获取到location，从而得到当前请求的路由路径
   const location = useLocation();
-  const path = location.pathname;
+  let path = location.pathname;
+  if(path.indexOf('/admin/storage') === 0){ //当前请求的是商品或其子路由界面
+    path = '/admin/storage'
+  }
   const [openkey, setOpenkey] = useState('');
   const [menuNodes, setMenuNodes] = useState([]);
 
@@ -69,7 +72,6 @@ function LeftNav() {
         <Menu
           mode="inline"
           className='left-menu'
-          // items={menuNodes}
           //defaultSelectedKeys初始选中的菜单项 key 数组;selectedKeys当前需要展开的选中的菜单项 key 数组，更好用
           selectedKeys={[path]}
           defaultOpenKeys={[openkey]}

@@ -24,12 +24,17 @@ export const reqDownloadFile = (accessToken, fsids) => ajax2(BASE + '/pan/baidu/
 export const reqCreateFile = (accessToken, isdir, path, size, blockList, uploadid) => ajax2(BASE + '/pan/baidu/createFileUp', {accessToken, isdir, path, size, blockList, uploadid}, 'POST')
 //上传文件
 export const reqUploadFile = (formDate) => ajax3(BASE + '/pan/baidu/upFile', formDate, {}, 'POST')
-
-//获取一个分类
-export const reqCategory = (categoryId) => ajax(BASE + '/manage/category/info', {categoryId})
-//获取商品分页列表
-export const reqProducts = (pageNum, pageSize) => ajax(BASE + '/manage/product/list', {pageNum, pageSize})
-//更新商品的状态（上架/下架）
-export const reqUpdateStatus = (productId, status) => ajax(BASE + '/manage/product/updateStatus', {productId, status}, 'POST')
-//获取所有角色的列表
-export const reqRoles = () => ajax(BASE + '/manage/role/list')
+//获取存储列表
+export const reqStoreList = () => ajax2(BASE + '/store/getStoreList', {}, 'POST')
+//根据id获取存储列表
+export const reqStoreListById = (id) => ajax(BASE + '/store/getStoreListById', {id}, 'POST')
+//删除存储
+export const reqDeleteStore = (id) => ajax(BASE + '/store/deleteStore', {id}, 'POST')
+//新增存储
+export const reqAddStore = (storeName, storePassword, storeSort, storeToken, storeUrl, storeUsername, visible) => ajax(BASE + '/store/addStore', {storeName, storePassword, storeSort, storeToken, storeUrl, storeUsername, visible}, 'POST')
+//更新存储
+export const reqUpdateStore = (id, storeName, storePassword, storeToken, storeUrl, storeUsername, visible) => ajax(BASE + '/store/updateStore', {id, storeName, storePassword, storeToken, storeUrl, storeUsername, visible}, 'POST')
+//获取存储分类
+export const reqStoreType = () => ajax(BASE + '/store/getStoreSortList', {}, 'POST')
+//客户端，获取可见的存储列表
+export const reqVisibleStoreList = () => ajax(BASE + '/store/getStoreListVisible', {}, 'POST')

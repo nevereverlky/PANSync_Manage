@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import storageUtils from '../../utils/storageUtils';
 import { Card, Button, Layout, Breadcrumb, Table, notification, Popover, List, Modal, Input, Form, TreeSelect, Upload } from 'antd';
 import { EditOutlined, HomeTwoTone, FolderFilled, SyncOutlined, FolderAddOutlined, CloudUploadOutlined, ExclamationCircleFilled, InboxOutlined, CopyOutlined, DeleteOutlined, CloudDownloadOutlined, CheckCircleFilled } from '@ant-design/icons';
-import { reqFileList, reqManageFile, reqDownloadFile, reqCreateFile, reqUploadFile,reqFileTree } from '../../api';
+import { reqFileList, reqManageFile, reqDownloadFile, reqCreateFile, reqUploadFile, reqFileTree, reqVisibleStoreList } from '../../api';
 import { formateDate } from '../../utils/dateUtils';
 import { b2ValueUnit } from '../../utils/BtoMBUtils';
 import SparkMD5 from 'spark-md5';
@@ -63,22 +63,7 @@ function Client() {
       />
     );
     //表格数据
-    const [dataSource, setDataSource] = useState([
-      {
-        key: '1',
-        serverFilename: '百度云盘',
-        size: 0,
-        serverMtime: '1970-1-20 15:32:33',
-        path: '/'
-      },
-      {
-        key: '2',
-        serverFilename: '阿里云盘',
-        size: 0,
-        serverMtime: '1970-1-20 15:32:33',
-        path: '/'
-      },
-    ]);
+    const [dataSource, setDataSource] = useState([]);
     const columns = [
       {
         render: () => <FolderFilled style={{color: 'rgb(24,144,255)', fontSize: '25px'}}/>,
@@ -113,7 +98,7 @@ function Client() {
         width: 100,
         ellipsis:true,
         align: 'right',
-        render: (serverMtime) => formateDate(serverMtime)
+        render: (serverMtime) => serverMtime==='-'? "-":formateDate(serverMtime)
       },
       {
         width: 50,
@@ -130,7 +115,7 @@ function Client() {
     //面包屑
     const [extraBreadcrumbItems, setExtraBreadcrumbItems] = useState([]);
     const breadcrumbItems = [
-      <Breadcrumb.Item key="home" className="client-breadcrumbItem" style={{margin: '0 5px 0 5px'}} onClick={()=> setDir('/')}>
+      <Breadcrumb.Item key="home" className="client-breadcrumbItem" style={{margin: '0 5px 0 5px'}} onClick={()=> getStoreList()}>
         <HomeTwoTone style={{marginRight: '10px', fontSize: '20px' }}/>主页
       </Breadcrumb.Item>,
     ].concat(extraBreadcrumbItems);
@@ -479,7 +464,7 @@ function Client() {
         const isdir = "0";
         const file = fileList;
         const size = file.size;
-        const path = dir;
+        const path = dir + "/" + file.name;
         const blockList = md5;
         // console.log(accessToken, isdir, path, size, blockList, file)
         const formData = new FormData();
@@ -544,6 +529,29 @@ function Client() {
           });
         }
     }
+    //获取百度网盘文件列表
+    const getStoreList = async() => {
+        setLoading(true);
+        const result = await reqVisibleStoreList();
+        setLoading(false);
+        if (result.resultCode === '200') {
+            const storeList = result.resultObject;
+            storeList.forEach((item) => {
+              item['key']=item.id;
+              item['serverFilename']=item.storeName;
+              item['size']=0;
+              item['serverMtime']="-";
+              item['path']=item.storeUrl;
+            })
+            setDataSource(storeList);
+            console.log(storeList);
+        } else {
+            notification.open({
+                message: result.resultMsg,
+                icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
+            });
+        }
+    }
     //每次 render 后执行
     useEffect(() => {
         const user = storageUtils.getUser();
@@ -554,6 +562,10 @@ function Client() {
             navigate('/login', {replace: true});
         }
     })
+    //仅第一次 render 后执行
+    useEffect(() => {
+      getStoreList()
+    }, [])
     //第一次以及依赖项发生变化后执行
     useEffect(() => {
       getFileList(dir)
