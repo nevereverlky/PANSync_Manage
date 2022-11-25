@@ -24,22 +24,6 @@ function StorageHome() {
             });
         }
     }
-    //刷新列表
-    const fresh = (index) => {
-      setLoadings((prevLoadings) => {
-        const newLoadings = [...prevLoadings];
-        newLoadings[index] = true;
-        return newLoadings;
-      });
-      getStoreList();
-      setTimeout(() => {
-        setLoadings((prevLoadings) => {
-          const newLoadings = [...prevLoadings];
-          newLoadings[index] = false;
-          return newLoadings;
-        });
-      }, 1000);
-    }
     //禁用、启用按钮
     const [loadings, setLoadings] = useState([]);
     const changeIsWork = async (item) => {
@@ -75,6 +59,22 @@ function StorageHome() {
           });
       }
     };
+    //刷新列表
+    const fresh = (index) => {
+      setLoadings((prevLoadings) => {
+        const newLoadings = [...prevLoadings];
+        newLoadings[index] = true;
+        return newLoadings;
+      });
+      getStoreList();
+      setTimeout(() => {
+        setLoadings((prevLoadings) => {
+          const newLoadings = [...prevLoadings];
+          newLoadings[index] = false;
+          return newLoadings;
+        });
+      }, 1000);
+    }
     //删除按钮
     const deleteConfirm = (item) => {
       confirm({

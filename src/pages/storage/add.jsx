@@ -8,7 +8,7 @@ import './add.less';
 function StorageAdd() {
 
     const navigate = useNavigate();
-
+    const [form] = Form.useForm();
     //获取存储分类列表
     const [selectList, setSelectList] = useState([]);
     const getStoreList = async() => {
@@ -16,6 +16,7 @@ function StorageAdd() {
         console.log(result);
         if (result.resultCode === '200') {
             setSelectList(result.resultObject);
+            form.setFieldsValue({storeUrl: storeSort === '百度网盘'? "/" : ""})
         } else {
             notification.open({
                 message: result.resultMsg,
@@ -58,7 +59,7 @@ function StorageAdd() {
     //仅第一次 render 后执行
     useEffect(() => {
         getStoreList()
-    },[])
+    },[storeSort])
 
     return (
         <div className='storage-add'>
@@ -67,6 +68,7 @@ function StorageAdd() {
                 <Form
                     name="basic_form"
                     className='add-form'
+                    form={form}
                     layout='vertical'
                     labelCol={{ span: 10 }}
                     wrapperCol={{ span: 10 }}
@@ -127,7 +129,6 @@ function StorageAdd() {
                                 message: storeSort === '百度网盘'? "请填写根文件夹路径" : "请填写地址" ,
                             },
                         ]}
-                        initialValue={storeSort === '百度网盘'? "/" : "" }
                     >
                         <Input bordered={false} size="large"/>
                     </Form.Item>}

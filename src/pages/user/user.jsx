@@ -7,6 +7,7 @@ const { confirm } = Modal;
 
 function User() {
 
+  const [form] = Form.useForm();
   //表格数据
   const [dataSource, setDataSource] = useState([]);
   const [userObj, setUserObj] = useState({});
@@ -109,7 +110,7 @@ function User() {
        render: (userObj) => {
          return (
           <div className='user-table-button'>
-            <Button size="large" className="user-table-edit" onClick={() => {setIsUpdateOpen(true);setUserObj(userObj)}}> 编辑 </Button>
+            <Button size="large" className="user-table-edit" onClick={() => {setIsUpdateOpen(true);setUserObj(userObj);form.setFieldsValue({nickname: userObj.nickname, username: userObj.username, role: userObj.role})}}> 编辑 </Button>
             <Button size="large" className="user-table-delete" onClick={() => deleteConfirm(userObj)}> 删除 </Button>
           </div>
          )
@@ -267,6 +268,7 @@ function User() {
             <Form
               name="normal_user"
               className="user-form"
+              form={form}
               layout='vertical'
               onFinish={handleUpdateOk}>
                 <Form.Item
@@ -279,7 +281,6 @@ function User() {
                         message: '请填写用户名',
                       },
                     ]}
-                    initialValue={userObj.nickname}
                 >
                   <Input bordered={false} size="large"/>
                 </Form.Item>
@@ -293,7 +294,6 @@ function User() {
                         message: '请填写帐号',
                       },
                     ]}
-                    initialValue={userObj.username}
                 >
                   <Input bordered={false} size="large"/>
                 </Form.Item>
@@ -311,7 +311,6 @@ function User() {
                         required: true,
                       },
                     ]}
-                    initialValue={userObj.role}
                 >
                   <Radio.Group size="large" options={roleOptions} onChange={onRoleChange} value={role} optionType="button" />
                 </Form.Item>

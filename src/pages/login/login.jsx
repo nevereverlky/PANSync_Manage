@@ -61,12 +61,9 @@ function Login() {
                     headStyle={{color: 'rgb(0, 161, 191)', textAlign: 'center', fontSize:'20px', fontWeight: 'bold'}}
                 >
                     <Form
-                        name="normal_login"
+                        name="control-hooks"
                         className="login-form"
                         form={form}
-                        initialValues={{
-                            remember: true,
-                        }}
                         onFinish={onFinish}
                     >
                         <Form.Item
@@ -79,7 +76,6 @@ function Login() {
                                 message: '请输入用户名',
                                 }
                             ]}
-                            initialValue="admin"//指定初始值
                         >
                             <Input placeholder="请输入用户名" bordered={false} size="large"/>
                         </Form.Item>
@@ -98,15 +94,12 @@ function Login() {
                                 }
                                 }
                             ]}
-                            initialValue="admin"
                         >
                             <Input type="password" placeholder="请输入密码" bordered={false} size="large" />
                         </Form.Item>
                         <Form.Item className='login-form-button'>
-                            <Button type="primary" size="large"  
-                            htmlType="button"
-                            className="login-form-clear" onClick={onReset}> 清除 </Button>
-                            <Button type="primary" size="large" htmlType="submit" className="login-form-submit"> 登录 </Button>
+                            <Button type="primary" className="login-form-clear" size="large" htmlType="button" onClick={onReset}> 清除 </Button>
+                            <Button type="primary" className="login-form-submit" size="large" htmlType="submit" > 登录 </Button>
                         </Form.Item>
                     </Form>
                 </Card>

@@ -55,3 +55,7 @@ export const reqAddUser = (nickname, password, role, username) => ajax2(BASE + '
 export const reqUpdateUser = (id, nickname, password, role, username) => ajax(BASE + '/user/updateUser', {id, nickname, password, role, username}, 'POST')
 //删除帐号
 export const reqDeleteUser = (id) => ajax(BASE + '/user/delUser', {id}, 'POST')
+//获取最新一条公告
+export const reqNotice = () => ajax2(BASE + '/setting/notice/getNotice', {}, 'POST')
+//添加公告
+export const reqAddNotice = (content) => ajax(BASE + '/setting/notice/addNotice', {content}, 'POST')

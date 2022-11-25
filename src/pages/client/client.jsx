@@ -5,9 +5,9 @@ import React, { useEffect, useState } from 'react';
 import './client.less';
 import { useNavigate } from 'react-router-dom';
 import storageUtils from '../../utils/storageUtils';
-import { Card, Button, Layout, Breadcrumb, Table, notification, Popover, List, Modal, Input, Form, TreeSelect, Upload } from 'antd';
-import { EditOutlined, HomeTwoTone, FolderFilled, SyncOutlined, FolderAddOutlined, CloudUploadOutlined, ExclamationCircleFilled, InboxOutlined, CopyOutlined, DeleteOutlined, CloudDownloadOutlined, CheckCircleFilled } from '@ant-design/icons';
-import { reqFileList, reqManageFile, reqDownloadFile, reqCreateFile, reqUploadFile, reqFileTree, reqVisibleStoreList, reqWebDavFileList, reqDownloadWebDavFile, reqDeleteWebDavFile } from '../../api';
+import { Card, Tag, Button, Layout, Breadcrumb, Table, notification, Popover, List, Modal, Input, Form, TreeSelect, Upload } from 'antd';
+import { EditOutlined, HomeTwoTone, FolderFilled, SyncOutlined, FolderAddOutlined, CloudUploadOutlined, ExclamationCircleFilled, InboxOutlined, CopyOutlined, DeleteOutlined, CloudDownloadOutlined, CheckCircleFilled, RadiusUprightOutlined } from '@ant-design/icons';
+import { reqFileList, reqManageFile, reqDownloadFile, reqCreateFile, reqUploadFile, reqFileTree, reqVisibleStoreList, reqWebDavFileList, reqDownloadWebDavFile, reqDeleteWebDavFile, reqNotice } from '../../api';
 import { formateDate, utc2timestamp } from '../../utils/dateUtils';
 import { b2ValueUnit } from '../../utils/BtoMBUtils';
 import SparkMD5 from 'spark-md5';
@@ -17,6 +17,7 @@ const { Dragger } = Upload;
 
 function Client() {
 
+    const [form] = Form.useForm();
     const [storeSort, setstoreSort] = useState("");
     const [accessToken, setAccessToken] = useState("");
     const navigate = useNavigate();
@@ -253,7 +254,6 @@ function Client() {
     };
     const handleRenameCancel = () => {
       setIsRenameOpen(false);
-      setFileName('');
     };
     //百度网盘创建文件夹
     const [isCreateFileOpen, setIsCreateFileOpen] = useState(false);
@@ -639,6 +639,7 @@ function Client() {
     const manageFile = async(action) => {
       if(action === '重命名') {
         setIsRenameOpen(true);
+        form.setFieldsValue({newname: fileName})
       } else if (action === '删除') {
         showDeleteConfirm();
       } else if (action === '复制') {
@@ -690,6 +691,35 @@ function Client() {
             });
         }
     }
+    //公告
+    const [api, contextHolder] = notification.useNotification();
+    //使方法只执行一次
+    const once = (fn) => {
+      let caller = true;
+      return function() {
+          if(caller) {
+              caller = false
+              fn.apply(this, arguments)
+          }
+      }
+    }
+    const openNotification = once(async function() {
+      const result = await reqNotice();
+      console.log(result);
+      if (result.resultCode === '200') {
+        api.info({
+          message: '公告',
+          description: result.resultObject.content,
+          placement: 'topRight',
+          duration: null
+        });
+      } else {
+        notification.open({
+            message: result.resultMsg,
+            icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
+        });
+      }
+    });
     //每次 render 后执行
     useEffect(() => {
         const user = storageUtils.getUser();
@@ -702,7 +732,8 @@ function Client() {
     })
     //仅第一次 render 后执行
     useEffect(() => {
-      getStoreList()
+      getStoreList();
+      openNotification();
     }, [])
     //第一次以及依赖项发生变化后执行
     useEffect(() => {
@@ -717,6 +748,7 @@ function Client() {
 
         return (
             <Layout className='client'>
+                {contextHolder}
                 <Header className='client-header'>PANSync</Header>
                 <Content className='client-content'>
                     <Breadcrumb className='client-breadcrumb'>
@@ -744,15 +776,13 @@ function Client() {
                       <Button type="text" icon={<CloudUploadOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={() => {setIsUploadFileOpen(true)}}/>
                     </div>
                 </Content>
-                <Modal title="输入一个新名称" open={isRenameOpen} onCancel={handleRenameCancel} footer={[]}>
+                <Modal title="输入新名称" open={isRenameOpen} onCancel={handleRenameCancel} footer={[]}>
                   <Form
                       name="normal_client"
                       className="client-form"
-                      initialValues={{
-                          remember: true,
-                      }}
+                      form={form}
                       onFinish={handleRenameOk}>
-                        <Form.Item name="newname" initialValue={fileName}>
+                        <Form.Item name="newname">
                           <Input placeholder="请输入新名称" size="large"/>
                         </Form.Item>
                         <Form.Item className='client-form-button'>
@@ -764,9 +794,6 @@ function Client() {
                   <Form
                       name="normal_client"
                       className="client-form"
-                      initialValues={{
-                          remember: true,
-                      }}
                       onFinish={handleCreateFileOk}>
                         <Form.Item name="filename">
                           <Input placeholder="请输入新名称" size="large"/>
