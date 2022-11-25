@@ -5,8 +5,8 @@ import React, { useEffect, useState } from 'react';
 import './client.less';
 import { useNavigate } from 'react-router-dom';
 import storageUtils from '../../utils/storageUtils';
-import { Card, Tag, Button, Layout, Breadcrumb, Table, notification, Popover, List, Modal, Input, Form, TreeSelect, Upload } from 'antd';
-import { EditOutlined, HomeTwoTone, FolderFilled, SyncOutlined, FolderAddOutlined, CloudUploadOutlined, ExclamationCircleFilled, InboxOutlined, CopyOutlined, DeleteOutlined, CloudDownloadOutlined, CheckCircleFilled, RadiusUprightOutlined } from '@ant-design/icons';
+import { Card, Button, Layout, Breadcrumb, Table, notification, Popover, List, Modal, Input, Form, TreeSelect, Upload } from 'antd';
+import { EditOutlined, HomeTwoTone, FolderFilled, SyncOutlined, FolderAddOutlined, CloudUploadOutlined, ExclamationCircleFilled, InboxOutlined, CopyOutlined, DeleteOutlined, CloudDownloadOutlined, CheckCircleFilled } from '@ant-design/icons';
 import { reqFileList, reqManageFile, reqDownloadFile, reqCreateFile, reqUploadFile, reqFileTree, reqVisibleStoreList, reqWebDavFileList, reqDownloadWebDavFile, reqDeleteWebDavFile, reqNotice } from '../../api';
 import { formateDate, utc2timestamp } from '../../utils/dateUtils';
 import { b2ValueUnit } from '../../utils/BtoMBUtils';
@@ -125,7 +125,15 @@ function Client() {
     ].concat(extraBreadcrumbItems);
     //跳转到管理端
     const toManage = () => {
-      navigate('/admin/storage', {replace: true});
+      const user = storageUtils.getUser();
+      if(user.role === 0) {
+        navigate('/admin/storage', {replace: true});
+      } else {
+        notification.open({
+          message: '管理端仅管理员角色进入',
+          icon: <ExclamationCircleFilled style={{ color: 'rgb(229,72,77)' }} />,
+      });
+      }
     }
     //获取百度网盘文件列表
     const getFileList = async(dir, accessToken) => {

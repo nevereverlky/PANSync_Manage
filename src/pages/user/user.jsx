@@ -319,7 +319,7 @@ function User() {
                 </Form.Item>
             </Form>
         </Modal>
-      </div>
+    </div>
   );
 }
 

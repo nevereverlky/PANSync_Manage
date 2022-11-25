@@ -70,8 +70,8 @@ const menuList = [
         icon: 'DatabaseOutlined'
     },
     { 
-        title: '元信息', 
-        key: '/admin/Information', 
+        title: '通知', 
+        key: '/admin/information', 
         icon: 'BuildOutlined'
     },
     { 

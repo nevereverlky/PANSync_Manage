@@ -59,3 +59,13 @@ export const reqDeleteUser = (id) => ajax(BASE + '/user/delUser', {id}, 'POST')
 export const reqNotice = () => ajax2(BASE + '/setting/notice/getNotice', {}, 'POST')
 //添加公告
 export const reqAddNotice = (content) => ajax(BASE + '/setting/notice/addNotice', {content}, 'POST')
+//获取通知列表
+export const reqInformList = () => ajax2(BASE + '/inform/getAllInform', {}, 'POST')
+//根据id获取通知
+export const reqInformListById = (id) => ajax(BASE + '/inform/getInformById', {id}, 'POST')
+//增加通知
+export const reqAddInform = (name, sec, token) => ajax(BASE + '/inform/addInform', {name, sec, token}, 'POST')
+//更新通知
+export const reqUpdateInform = (id, name, sec, token) => ajax(BASE + '/inform/updateInform', {id, name, sec, token}, 'POST')
+//删除通知
+export const reqDeleteInform = (id) => ajax(BASE + '/inform/deleteInform', {id}, 'POST')
