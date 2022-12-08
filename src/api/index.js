@@ -69,3 +69,7 @@ export const reqAddInform = (name, sec, token) => ajax(BASE + '/inform/addInform
 export const reqUpdateInform = (id, name, sec, token) => ajax(BASE + '/inform/updateInform', {id, name, sec, token}, 'POST')
 //删除通知
 export const reqDeleteInform = (id) => ajax(BASE + '/inform/deleteInform', {id}, 'POST')
+
+/**安卓端 */
+//接收安卓客户端的信息
+export const reqAndroid = (content) => ajax(BASE + '/inform/listenAndroid', {content}, 'POST')

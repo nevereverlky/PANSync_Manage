@@ -1,12 +1,13 @@
 /**
- * 后台管理主路由组件
+ * 客户端主路由组件
 */
 import React, { useEffect, useState } from 'react';
 import './client.less';
 import { useNavigate } from 'react-router-dom';
 import storageUtils from '../../utils/storageUtils';
-import { Card, Button, Layout, Breadcrumb, Table, notification, Popover, List, Modal, Input, Form, TreeSelect, Upload } from 'antd';
-import { EditOutlined, HomeTwoTone, FolderFilled, SyncOutlined, FolderAddOutlined, CloudUploadOutlined, ExclamationCircleFilled, InboxOutlined, CopyOutlined, DeleteOutlined, CloudDownloadOutlined, CheckCircleFilled } from '@ant-design/icons';
+import logo from '../../assets/images/logo.png'
+import { Card, Tag, Button, Layout, Breadcrumb, Table, notification, Popover, List, Modal, Input, Form, TreeSelect, Upload } from 'antd';
+import { EditOutlined, HomeTwoTone, FolderFilled, SyncOutlined, FolderAddOutlined, CloudUploadOutlined, ExclamationCircleFilled, InboxOutlined, CopyOutlined, DeleteOutlined, CloudDownloadOutlined, CheckCircleFilled, FileAddOutlined, ApiOutlined, CheckSquareOutlined, SettingOutlined, ExportOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { reqFileList, reqManageFile, reqDownloadFile, reqCreateFile, reqUploadFile, reqFileTree, reqVisibleStoreList, reqWebDavFileList, reqDownloadWebDavFile, reqDeleteWebDavFile, reqNotice } from '../../api';
 import { formateDate, utc2timestamp } from '../../utils/dateUtils';
 import { b2ValueUnit } from '../../utils/BtoMBUtils';
@@ -71,7 +72,7 @@ function Client() {
     const columns = [
       {
         render: () => <FolderFilled style={{color: 'rgb(24,144,255)', fontSize: '25px'}}/>,
-        width: 15
+        width: 20
       },
       {
         title: '名称',
@@ -79,6 +80,14 @@ function Client() {
         key: 'serverFilename',
         width: 150,
         ellipsis:true
+      },
+      {
+        title: '驱动',
+        dataIndex: 'storeSort',
+        key: 'storeSort',
+        width: 100,
+        ellipsis:true,
+        render: (storeSort) => <Tag color={storeSort === '百度网盘'? 'blue':storeSort === 'WebDav'?'cyan':'purple'} style={{fontWeight: 'bold'}}>{storeSort}</Tag>,
       },
       {
         title: '大小',
@@ -728,6 +737,24 @@ function Client() {
         });
       }
     });
+    //登出
+    const logout = () => {
+      //显示确认框
+      confirm({
+        icon: <ExclamationCircleOutlined />,
+        content: '是否确认退出登录',
+        onOk: () => {
+          console.log('OK');
+          //删除保存的user数据
+          storageUtils.removeUser()
+          //跳转到login
+          navigate('/login', {replace: true});
+        },
+        onCancel() {
+          console.log('Cancel');
+        },
+      })
+    }
     //每次 render 后执行
     useEffect(() => {
         const user = storageUtils.getUser();
@@ -757,7 +784,7 @@ function Client() {
         return (
             <Layout className='client'>
                 {contextHolder}
-                <Header className='client-header'>PANSync</Header>
+                <Header className='client-header'><img src={logo} alt="logo"/>PANSync</Header>
                 <Content className='client-content'>
                     <Breadcrumb className='client-breadcrumb'>
                       {breadcrumbItems}
@@ -779,9 +806,13 @@ function Client() {
                     </Card>
                     <div className='client-toolbar'>
                       <Button type="text" icon={<SyncOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={() => {getFileList(dir, accessToken)}}/>
-                      {/* <Button type="text" icon={<FileAddOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}}/> */}
+                      <Button type="text" icon={<FileAddOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}}/>
                       <Button type="text" icon={<FolderAddOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={() => {setIsCreateFileOpen(true)}}/>
                       <Button type="text" icon={<CloudUploadOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={() => {setIsUploadFileOpen(true)}}/>
+                      <Button type="text" icon={<ApiOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}}/>
+                      <Button type="text" icon={<CheckSquareOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}}/>
+                      <Button type="text" icon={<SettingOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}}/>
+                      <Button type="text" icon={<ExportOutlined style={{fontSize: '20px'}}/>} style={{width: '40px', height: '40px'}} onClick={logout}/>
                     </div>
                 </Content>
                 <Modal title="输入新名称" open={isRenameOpen} onCancel={handleRenameCancel} footer={[]}>

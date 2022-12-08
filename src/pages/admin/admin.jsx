@@ -1,5 +1,5 @@
 /**
- * 后台管理主路由组件
+ * 后台管理路由组件
 */
 import React, { useEffect } from 'react';
 import './admin.less';

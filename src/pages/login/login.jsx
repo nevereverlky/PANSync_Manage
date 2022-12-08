@@ -54,7 +54,7 @@ function Login() {
         return (
             <div className='login'>
                 <Card 
-                    title="登录到 PANSync" 
+                    title="登录到 PANSync"
                     className='login-card' 
                     bordered={false} 
                     hoverable={true} 

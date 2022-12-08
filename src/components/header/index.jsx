@@ -2,6 +2,7 @@ import React from 'react';
 import './index.less';
 import storageUtils from '../../utils/storageUtils';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/images/logo.png'
 import { ExportOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { Button, Modal } from 'antd';
 
@@ -33,7 +34,7 @@ function Header(){
     return (
       <div className="header">
         <div className="header-left">
-            PANSync 管理
+          <img src={logo} alt="logo"/>PANSync 管理
         </div>
         <div className="header-right">
           <Button type="primary" size="large" icon={<ExportOutlined />} onClick={logout}/>
